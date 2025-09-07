@@ -1,7 +1,7 @@
 local function alarm_invoked()
-    local pollution = adc.read(0)
+    local value = adc.read(0)
     http.post(
-        string.format("http://polsensor.tpho.dk/api/log/%d", pollution), 
+        string.format("http://%s/%d/%d", URL, value, TYPE), 
         "",
         "",
         function(code, data)
