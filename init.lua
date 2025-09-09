@@ -29,13 +29,15 @@ wifi_got_ip_event = function(T)
   tmr.create():alarm(3000, tmr.ALARM_SINGLE, startup)
 end
 
+WIFI_IDX = 1
+
 wifi_disconnect_event = function(T)
   if T.reason == wifi.eventmon.reason.ASSOC_LEAVE then
     --the station has disassociated from a previously connected AP
     return
   end
   -- total_tries: how many times the station will attempt to connect to the AP. Should consider AP reboot duration.
-  local total_tries = 75
+  local total_tries = 5
   print("\nWiFi connection to AP("..T.SSID..") has failed!")
 
   --There are many possible disconnect reasons, the following iterates through
@@ -56,7 +58,15 @@ wifi_disconnect_event = function(T)
     print("Retrying connection...(attempt "..(disconnect_ct+1).." of "..total_tries..")")
   else
     wifi.sta.disconnect()
-    print("Aborting connection to AP!")
+    disconnect_ct = nil
+    if WIFI_IDX >= #WIFI then
+        print("Aborting connection to AP!")
+    else
+        print("Connecting to next in line")
+        WIFI_IDX = WIFI_IDX + 1
+        wifi.sta.config({ssid = WIFI[WIFI_IDX].ssid, pwd = WIFI[WIFI_IDX].password})
+    end
+    
     disconnect_ct = nil
   end
 end
@@ -68,5 +78,5 @@ wifi.eventmon.register(wifi.eventmon.STA_DISCONNECTED, wifi_disconnect_event)
 
 print("Connecting to WiFi access point...")
 wifi.setmode(wifi.STATION)
-wifi.sta.config({ssid=SSID, pwd=PASSWORD})
+wifi.sta.config({ssid = WIFI[WIFI_IDX].ssid, pwd = WIFI[WIFI_IDX].password})
 -- wifi.sta.connect() not necessary because config() uses auto-connect=true by default

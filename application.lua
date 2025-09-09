@@ -5,7 +5,7 @@ local function alarm_invoked()
         "",
         "",
         function(code, data)
-            print("returned code", code);
+            print(string.format("POST 'http://%s/%d/%d' returned code '%d'", URL, value, TYPE, code));
         end
     )
 end
